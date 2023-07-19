@@ -14,12 +14,13 @@ implementations="seq omp"
 
 output_file="resultados.csv"
 
-echo "Grid Size,Num Threads,Implementação,Tempo Médio" > $output_file
+echo "Grid Size,Num Threads,Implementação,Tempo 1,Tempo 2,Tempo 3,Tempo 4,Tempo 5,Tempo 6,Tempo 7,Tempo 8,Tempo 9,Tempo 10,Tempo Médio" > $output_file
 
 for grid_size in $grid_sizes; do
     for num_thread in $num_threads; do
         for impl in $implementations; do
             total_time=0
+            declare -a times_array=()
 
             # Executar o teste 10 vezes
             for ((i=1; i<=10; i++)); do
@@ -32,13 +33,16 @@ for grid_size in $grid_sizes; do
 
                 # Somar o tempo total das 10 execuções
                 total_time=$(awk "BEGIN {print $total_time + $time}")
+            
+                times_array+=($time)
             done
 
             # Calcular o tempo médio
             average_time=$(awk "BEGIN {print $total_time / 10}")
 
             # Adicionar a linha ao arquivo CSV
-            echo "$grid_size,$num_thread,$impl,$average_time" >> $output_file
+            echo "$grid_size,$num_thread,$impl,${times_array[0]},${times_array[1]},${times_array[2]},${times_array[3]},${times_array[4]},${times_array[5]},${times_array[6]},${times_array[7]},${times_array[8]},${times_array[9]},$average_time" >> $output_file
+
         done
     done
 done
