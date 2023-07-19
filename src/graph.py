@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -37,7 +39,7 @@ plt.show()
 plt.figure()
 for j in range(len(grid_sizes)):
     for k, imp in enumerate(implementations):
-        plt.errorbar(num_threads, mean_times[:, j, k], yerr=ci_times[:, j, k], label=f"{grid_sizes[j]} grid size - {imp}", marker='o')
+        plt.errorbar(grid_sizes, mean_times[i, :, k], yerr=ci_times[i, :, k], label="{} threads - {}".format(num_threads[i], imp), marker='o')
 
 plt.xlabel("Número de Threads")
 plt.ylabel("Tempo de Execução Médio")
