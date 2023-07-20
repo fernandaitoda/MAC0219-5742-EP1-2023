@@ -56,60 +56,34 @@ static void *update(void *arg)
         for (int j = 0; j < grid_size; j++)
         {
             if (grid_in[ind2d(i, j)] == WALL)
-            {
-
                 grid_out[ind2d(i, j)] = WALL;
-            }
             else
-            {
                 grid_out[ind2d(i, j)] = get_next_cell(i, j, grid_in, grid_size);
-            }
         }
     }
 
     pthread_exit(NULL);
 }
 
+
 void simulate_pth(byte *grid_1, byte *grid_2, int grid_size, int num_threads)
 {
     pthread_t threads[num_threads];
     ThreadArgs thread_args[num_threads];
 
-    int rows_per_thread = grid_size / num_threads;
-    int remaining_rows = grid_size % num_threads;
-    int current_row = 0;
+    int cells_per_thread = grid_size / num_threads;
 
-    for (int i = 0; i < ITERATIONS / 2; i++)
-    {
-        for (int t = 0; t < num_threads; t++)
-        {
-            int start_row = current_row;
-            int end_row = current_row + rows_per_thread;
+    for (int t = 0; t < num_threads; t++) {
+        thread_args[t].grid_in = (t % 2 == 0) ? grid_1 : grid_2;
+        thread_args[t].grid_out = (t % 2 == 0) ? grid_2 : grid_1;
+        thread_args[t].grid_size = grid_size;
+        thread_args[t].start_row = t * cells_per_thread;
+        thread_args[t].end_row = (t == num_threads - 1) ? grid_size : (t + 1) * cells_per_thread;
+        pthread_create(&threads[t], NULL, update, &thread_args[t]);
+    }
 
-            if (remaining_rows > 0)
-            {
-                end_row++;
-                remaining_rows--;
-            }
-
-            current_row = end_row;
-
-            thread_args[t].grid_in = grid_1;
-            thread_args[t].grid_out = grid_2;
-            thread_args[t].grid_size = grid_size;
-            thread_args[t].start_row = start_row;
-            thread_args[t].end_row = end_row;
-
-            pthread_create(&threads[t], NULL, update, &thread_args[t]);
-        }
-        for (int t = 0; t < num_threads; t++)
-        {
-            pthread_join(threads[t], NULL);
-        }
-
-        byte *temp = grid_1;
-        grid_1 = grid_2;
-        grid_2 = temp;
+    for (int t = 0; t < num_threads; t++) {
+        pthread_join(threads[t], NULL);
     }
 
 }
